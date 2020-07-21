@@ -19,14 +19,10 @@ def initialized_data():
     data_sentences = data_file.read().split("\n")
     for sentence in data_sentences:
         if sentence:
-            # first_word = sentence.split()[0]
             for i in range(len(sentence)):
                 for j in range(i + 1, len(sentence) + 1):
-                    data[sentence[i: j]].add(AutoCompleteData(sentence, "file.txt", 0, 2*len(sentence[i: j])))
-            # first_word = sentence.split()[0]         
-            # for i in range(len(first_word)):
-            #   for j in range(i + 1, len(first_word) + 1):        
-            #       data[first_word[i: j]].add(AutoCompleteData(sentence, "file.txt", 0, 2*len(first_word[i: j])))
+                    data[sentence[i: j]].add(AutoCompleteData(sentence, "file.txt", i, 2*len(sentence[i: j])))
+            
     with open("data.json", "w") as f:
         for key in data.keys():
             for a in data[key]:
@@ -68,10 +64,19 @@ def complete_prefix(prefix):
     return completed_prefix
 
 def get_best_k_completions(prefix):
-    founded_completions = list(data.get(prefix))
+    founded_completions = data.get(prefix)
     if len(founded_completions) < 5:
         founded_completions += complete_prefix(prefix) 
     founded_completions = sorted(founded_completions, key=lambda x: (x.get_score, x.get_completed_sentence))
     return founded_completions[:5]
-    # print(data)
-initialized_data()
+
+def menu():
+    print("Loading the files and preparing the system...")
+    initialized_data()
+    print("The system is ready. Enter your text:")
+    prefix = input()
+    best_completions_of_prefix = get_best_k_completions(prefix)
+    # for complete in best_completions_of_prefix:
+        # print(complete.get_completed_sentence, (, )) 
+
+menu()
