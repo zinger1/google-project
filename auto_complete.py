@@ -17,7 +17,7 @@ class AutoCompleteData:
         return self.score
 
     def set_score(self, num):
-        self.score -= num
+        self.score = num
 
 def initialized_data():
 
@@ -51,55 +51,64 @@ def initialized_data():
     #             json.dump({key:a.get_completed_sentence()}, f)
 
 def earase_prefix(prefix):
-    earased_prefix =  []
+    earased_prefix =  set()
     for i in range(len(prefix)):
-
         substring_for_search = data.get(prefix.replace(prefix[i], "", 1))
-        
-        if(substring_for_search):
-            substring_for_search.set_score(10 - 2 * i + 2) if i < 4 else substring_for_search.set_score(2 + 2)
-            earased_prefix.append(substring_for_search)
+
+        if substring_for_search:
+            for index_of_auto_complete_data in substring_for_search:
+                earsed = list_data_sentences[index_of_auto_complete_data]
+                scores = 2 * (len(prefix) - 1)
+                earsed.set_score(scores - (10 - 2 * i)) if i < 4 else substring_for_search.set_score(scores - 2)
+                # substring_for_search.set_score(10 - 2 * i + 2) if i < 4 else substring_for_search.set_score(2 + 2)
+                earased_prefix.add(earsed)
     return earased_prefix
     
 def change_prefix(prefix):
-    changed_prefix =  []
+    changed_prefix = set()
 
     for i in range(len(prefix)):
     
         for letter in range(ord('a'), ord('z') + 1):
-            substring_for_search = data.get(prefix.replace(prefix[i], letter, 1))
+            substring_for_search = data.get(prefix.replace(prefix[i], chr(letter), 1))
     
             if substring_for_search:
-                substring_for_search.set_score(5 - i + 2) if i < 4 else substring_for_search.set_score(2 + 2)
-                changed_prefix.append(substring_for_search)
+                for index_of_auto_complete_data in substring_for_search:
+                    changed = list_data_sentences[index_of_auto_complete_data]
+                    scores = 2 * (len(prefix) - 1)
+                    changed.set_score(scores - 5 - i) if i < 4 else substring_for_search.set_score(scores - 2)
+                    changed_prefix.add(changed)
 
     return changed_prefix
 
 def add_prefix(prefix):
-    added_prefix = []
+    added_prefix = set()
 
     for i in range(len(prefix) + 1):
     
         for letter in range(ord('a'), ord('z') + 1):
-            substring_for_search = data.get(prefix[:i] + letter + prefix[i:])
+            substring_for_search = data.get(prefix[:i] + chr(letter) + prefix[i:])
     
             if substring_for_search:
-                substring_for_search.set_score(5 - i + 2) if i < 4 else substring_for_search.set_score(2 + 2)
-                changed_prefix.append(substring_for_search)
+                for index_of_auto_complete_data in substring_for_search:
+                    added = list_data_sentences[index_of_auto_complete_data]
+                    scores = 2 * (len(prefix) - 1)
+                    added.set_score(scores - 5 - i) if i < 4 else substring_for_search.set_score(scores - 2)
+                    added_prefix.add(added)
+
     return added_prefix
 
 def complete_prefix(prefix):
-    completed_prefix = add_prefix(prefix)
-    completed_prefix += change_prefix(prefix)
-    completed_prefix +=  earase_prefix(prefix)
+    completed_prefix = earase_prefix(prefix)
+    completed_prefix.update(change_prefix(prefix))
+    completed_prefix.update(add_prefix(prefix))
     return completed_prefix
 
 def get_best_k_completions(prefix):
-    founded_completions = [*data.get(prefix),]
-
-    # if len(founded_completions) < 5:
-    #     founded_completions += complete_prefix(prefix) 
-    founded_completions = sorted(list(map(lambda x: list_data_sentences[x], founded_completions)), key=lambda x: (x.get_score(), x.get_completed_sentence()))
+    founded_completions = set([list_data_sentences[item] for item in data.get(prefix)])
+    if len(founded_completions) < 5:
+        founded_completions.update(complete_prefix(prefix)) 
+    founded_completions = sorted( founded_completions, key=lambda x: (x.get_score(), x.get_completed_sentence()), reverse=True)
     # founded_completions = sorted(founded_completions, key=lambda x: (list_data_sentences[x].get_score(), x.get_completed_sentence()))
     
     return founded_completions[:5]
