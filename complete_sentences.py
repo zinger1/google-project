@@ -1,4 +1,4 @@
-from auto_complete1 import data, list_data_sentences, initialized_data, prefix_ignore_casing
+from auto_complete import data, list_data_sentences, initialized_data, prefix_ignore_casing
 from copy import deepcopy
 
 class AutoComplete:
@@ -56,7 +56,7 @@ class AutoComplete:
         self.change_prefix()
         self.erase_prefix()
         self.add_prefix()
-        {k: v for k, v in sorted(self.get_founded_completions().items(), key=lambda item: item[1].get_score(), reverse=True)}
+        self.founded_completions = {k: v for k, v in sorted(self.get_founded_completions().items(), key=lambda item: item[1].get_score(), reverse=True)}
    
 def get_best_k_completions(prefix):
     k = 5
