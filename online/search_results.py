@@ -1,11 +1,12 @@
 from online.load import data, list_data_sentences
+from utils.ignore_casing import ignore_casing
 from copy import deepcopy
 
 
 class AutoComplete:
 
     def __init__(self, prefix):
-        self.prefix = prefix
+        self.prefix = ignore_casing(prefix)
         self.len_prefix = len(self.prefix)
         self.founded_completions = {}
 
